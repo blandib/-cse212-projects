@@ -1,6 +1,7 @@
 ﻿public class PriorityQueue
 {
     private List<PriorityItem> _queue = new();
+    private int _insertionCounter = 0;
 
     /// <summary>
     /// Add a new value to the queue with an associated priority.  The
@@ -11,7 +12,7 @@
     /// <param name="priority">The priority</param>
     public void Enqueue(string value, int priority)
     {
-        var newNode = new PriorityItem(value, priority);
+        var newNode = new PriorityItem(value, priority, _insertionCounter++);
         _queue.Add(newNode);
     }
 
@@ -24,14 +25,26 @@
 
         // Find the index of the item with the highest priority to remove
         var highPriorityIndex = 0;
-        for (int index = 1; index < _queue.Count - 1; index++)
+        for (int index = 1; index < _queue.Count; index++) // FIXED: Changed to _queue.Count
         {
-            if (_queue[index].Priority >= _queue[highPriorityIndex].Priority)
+            // For higher priority items, always select them
+            if (_queue[index].Priority > _queue[highPriorityIndex].Priority)
+            {
                 highPriorityIndex = index;
+            }
+            // For equal priority items, select the one with lower insertion order (FIFO)
+            else if (_queue[index].Priority == _queue[highPriorityIndex].Priority)
+            {
+                if (_queue[index].InsertionOrder < _queue[highPriorityIndex].InsertionOrder)
+                {
+                    highPriorityIndex = index;
+                }
+            }
         }
 
         // Remove and return the item with the highest priority
         var value = _queue[highPriorityIndex].Value;
+        _queue.RemoveAt(highPriorityIndex); // FIXED: Actually remove the item from the queue
         return value;
     }
 
@@ -47,11 +60,13 @@ internal class PriorityItem
 {
     internal string Value { get; set; }
     internal int Priority { get; set; }
+    internal int InsertionOrder { get; set; } // FIXED: Added to track FIFO for equal priorities
 
-    internal PriorityItem(string value, int priority)
+    internal PriorityItem(string value, int priority, int insertionOrder)
     {
         Value = value;
         Priority = priority;
+        InsertionOrder = insertionOrder;
     }
 
     // DO NOT MODIFY THE CODE IN THIS METHOD

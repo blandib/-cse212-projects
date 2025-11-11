@@ -55,18 +55,16 @@
             "problemMatcher": "$msCompile"
         },
 
-        {
-            "label": "build-week02-teach",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/week02/teach/teach.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
+       {
+  "label": "build-week02-teach",
+  "type": "process",
+  "command": "dotnet",
+  "args": [
+    "build",
+    "${workspaceFolder}/week02/teach/teach.csproj"
+  ],
+  "problemMatcher": "$msCompile"
+},
 
         {
             "label": "build-week02-analyze",
