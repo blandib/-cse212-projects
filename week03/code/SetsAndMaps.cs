@@ -1,4 +1,6 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 public static class SetsAndMaps
 {
@@ -19,11 +21,40 @@ public static class SetsAndMaps
     /// that there were no duplicates) and therefore should not be returned.
     /// </summary>
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
-    public static string[] FindPairs(string[] words)
+   public static string[] FindPairs(string[] words)
+{        
+    // TODO Problem 1 - ADD YOUR CODE HERE
+    var wordSet = new HashSet<string>(words);
+    var result = new List<string>();
+
+    foreach (var word in words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        // Skip if already removed (paired)
+        if (!wordSet.Contains(word))
+            continue;
+
+        // Skip special case like "aa"
+        if (word[0] == word[1])
+        {
+            wordSet.Remove(word);
+            continue;
+        }
+
+        // Reverse the word
+        var reversedWord = new string(new char[] { word[1], word[0] });
+
+        // Check if the reversed word exists in the set
+        if (wordSet.Contains(reversedWord))
+        {
+            result.Add($"{word} & {reversedWord}");
+            // Remove both words from the set to avoid duplicates
+            wordSet.Remove(word);
+            wordSet.Remove(reversedWord);
+        }
     }
+
+    return result.ToArray();
+}
 
     /// <summary>
     /// Read a census file and summarize the degrees (education)
@@ -39,10 +70,39 @@ public static class SetsAndMaps
     public static Dictionary<string, int> SummarizeDegrees(string filename)
     {
         var degrees = new Dictionary<string, int>();
+        // Read each line of the file
         foreach (var line in File.ReadLines(filename))
         {
-            var fields = line.Split(",");
+           
             // TODO Problem 2 - ADD YOUR CODE HERE
+           if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            // Split by comma (adjust if your census.txt uses tabs or spaces)
+            var fields = line.Split(new char[] { ',', '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Ensure there are at least 4 columns
+            if (fields.Length < 4)
+                continue;
+
+            string degree = fields[3].Trim();
+
+            if (string.IsNullOrEmpty(degree))
+            {
+                // Count "No Degree"
+                if (degrees.ContainsKey("No Degree"))
+                    degrees["No Degree"]++;
+                else
+                    degrees["No Degree"] = 1;
+            }
+            else
+            {
+                // Count actual degree
+                if (degrees.ContainsKey(degree))
+                    degrees[degree]++;
+                else
+                    degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -67,9 +127,40 @@ public static class SetsAndMaps
     public static bool IsAnagram(string word1, string word2)
     {
         // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        // normalize: lowercase and remove spaces
+        word1 = word1.ToLower().Replace(" ", "");
+        word2 = word2.ToLower().Replace(" ", "");
+        //quick length check
+        if (word1.Length != word2.Length)       
+        return false;   
+        var counts = new Dictionary<char, int>();
+        // counts characters in word1
+        foreach (var c in word1)
+        {
+            if (counts.ContainsKey(c))
+                counts[c]++;
+            else
+                counts[c] = 1;
+        }
+        // subtract counts using characters in word2
+        foreach (var c in word2)
+        {
+            if (counts.ContainsKey(c))
+            {
+                counts[c]--;
+                if (counts[c] < 0)
+                    return false; // more of char in word2 than word1
+           
+        }
     }
-
+        // check all counts are zero
+        foreach (var count in counts.Values)
+        {
+            if (count != 0)
+                return false;
+        }
+        return true;
+    }
     /// <summary>
     /// This function will read JSON (Javascript Object Notation) data from the 
     /// United States Geological Service (USGS) consisting of earthquake data.
